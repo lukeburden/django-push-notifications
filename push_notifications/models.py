@@ -56,7 +56,7 @@ class GCMDevice(Device):
 		verbose_name=_("Device ID"), blank=True, null=True, db_index=True,
 		help_text=_("ANDROID_ID / TelephonyManager.getDeviceId() (always as hex)")
 	)
-	registration_id = models.TextField(verbose_name=_("Registration ID"))
+	registration_id = models.TextField(verbose_name=_("Registration ID"), unique=True)
 
 	objects = GCMDeviceManager()
 
