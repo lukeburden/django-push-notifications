@@ -96,8 +96,19 @@ class GCMDeviceSerializer(UniqueRegistrationSerializerMixin, ModelSerializer):
 
 	class Meta(DeviceSerializerMixin.Meta):
 		model = GCMDevice
-
 		extra_kwargs = {"id": {"read_only": False, "required": False}}
+
+# added by Luke to enforce registration_id uniqueness, may not be needed now
+#        def validate_registration_id(self, value):
+#            """ Todo: poke around DRF and see if this is vulnerable to a race condition """
+#            if GCMDevice.objects.filter(
+#                user = self.context['request'].user,
+#                registration_id = value
+#            ).exists():
+#                raise ValidationError(
+#                    "A device with that registration_id already exists for that user."
+#                )
+#            return value
 
 	def validate_device_id(self, value):
 		# device ids are 64 bit unsigned values

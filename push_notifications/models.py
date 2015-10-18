@@ -52,16 +52,23 @@ class GCMDevice(Device):
 	# device_id cannot be a reliable primary key as fragmentation between different devices
 	# can make it turn out to be null and such:
 	# http://android-developers.blogspot.co.uk/2011/03/identifying-app-installations.html
+<<<<<<< 44f79fc3fb294c030b987a04be7c1ad397d05125
 	device_id = HexIntegerField(
 		verbose_name=_("Device ID"), blank=True, null=True, db_index=True,
 		help_text=_("ANDROID_ID / TelephonyManager.getDeviceId() (always as hex)")
 	)
 	registration_id = models.TextField(verbose_name=_("Registration ID"), unique=True)
+=======
+	device_id = HexIntegerField(verbose_name=_("Device ID"), blank=True, null=True, db_index=True,
+		help_text=_("ANDROID_ID / TelephonyManager.getDeviceId() (always as hex)"))
+	registration_id = models.TextField(verbose_name=_("Registration ID"))
+>>>>>>> Adjusting GCMDevice.registration_id to be unique for a specific user. Added a validation check to handle integrity errors.
 
 	objects = GCMDeviceManager()
 
 	class Meta:
 		verbose_name = _("GCM device")
+                unique_together = [('user', 'registration_id'),]
 
 	def send_message(self, message, **kwargs):
 		from .gcm import gcm_send_message
