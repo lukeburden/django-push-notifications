@@ -61,14 +61,18 @@ class GCMDevice(Device):
 =======
 	device_id = HexIntegerField(verbose_name=_("Device ID"), blank=True, null=True, db_index=True,
 		help_text=_("ANDROID_ID / TelephonyManager.getDeviceId() (always as hex)"))
+<<<<<<< fa0cd743c6f4c61aed798286109b7b438a9b5c4a
 	registration_id = models.TextField(verbose_name=_("Registration ID"))
 >>>>>>> Adjusting GCMDevice.registration_id to be unique for a specific user. Added a validation check to handle integrity errors.
+=======
+	registration_id = models.TextField(verbose_name=_("Registration ID"), blank=False)
+>>>>>>> Enforcing uniqueness per user for registration ids, disallowing blank registration ids and tightening up the DRF views to disallow editing of registration_id.
 
 	objects = GCMDeviceManager()
 
 	class Meta:
 		verbose_name = _("GCM device")
-                unique_together = [('user', 'registration_id'),]
+                unique_together = (('user', 'registration_id'),)
 
 	def send_message(self, message, **kwargs):
 		from .gcm import gcm_send_message
@@ -92,6 +96,7 @@ class APNSDeviceQuerySet(models.query.QuerySet):
 
 
 class APNSDevice(Device):
+<<<<<<< fa0cd743c6f4c61aed798286109b7b438a9b5c4a
 	device_id = models.UUIDField(
 		verbose_name=_("Device ID"), blank=True, null=True, db_index=True,
 		help_text="UDID / UIDevice.identifierForVendor()"
@@ -99,11 +104,17 @@ class APNSDevice(Device):
 	registration_id = models.CharField(
 		verbose_name=_("Registration ID"), max_length=200, unique=True
 	)
+=======
+	device_id = models.UUIDField(verbose_name=_("Device ID"), blank=True, null=True, db_index=True,
+		help_text="UDID / UIDevice.identifierForVendor()")
+	registration_id = models.CharField(verbose_name=_("Registration ID"), max_length=64, blank=False)
+>>>>>>> Enforcing uniqueness per user for registration ids, disallowing blank registration ids and tightening up the DRF views to disallow editing of registration_id.
 
 	objects = APNSDeviceManager()
 
 	class Meta:
 		verbose_name = _("APNS device")
+                unique_together = (('user', 'registration_id'),)
 
 	def send_message(self, message, **kwargs):
 		from .apns import apns_send_message

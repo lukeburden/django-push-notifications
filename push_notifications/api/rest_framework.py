@@ -32,10 +32,35 @@ class HexIntegerField(IntegerField):
 
 
 # Serializers
-class DeviceSerializerMixin(ModelSerializer):
+class DeviceSerializer(ModelSerializer):
+
 	class Meta:
 		fields = ("id", "name", "registration_id", "device_id", "active", "date_created")
 		read_only_fields = ("date_created",)
+# Luke: preventing editing of registration_id
+#		fields = ("name", "registration_id", "device_id", "active", "date_created")
+#		read_only_fields = ("date_created",)
+#
+#        def __init__(self, *args, **kwargs):
+#            """ Don't allow editing of the registration_id after
+#            instance creation """
+#            super(DeviceSerializer, self).__init__(*args, **kwargs)
+#            if self.updating():
+#                self.fields['registration_id'].read_only = True
+#
+#        def updating(self):
+#            return hasattr(self, 'instance') and self.instance
+#
+#        def validate_registration_id(self, value):
+#            """ Todo: poke around DRF and see if this is vulnerable to a race condition """
+#            if not self.updating() and self.__class__.Meta.model.objects.filter(
+#                user = self.context['request'].user,
+#                registration_id = value
+#            ).exists():
+#                raise ValidationError(
+#                    "A device with that registration_id already exists for that user."
+#                )
+#            return value
 
 		# See https://github.com/tomchristie/django-rest-framework/issues/1101
 		extra_kwargs = {"active": {"default": True}}
@@ -51,7 +76,6 @@ class APNSDeviceSerializer(ModelSerializer):
 
 		if hex_re.match(value) is None or len(value) not in (64, 200):
 			raise ValidationError("Registration ID (device token) is invalid")
-
 		return value
 
 
@@ -94,7 +118,7 @@ class GCMDeviceSerializer(UniqueRegistrationSerializerMixin, ModelSerializer):
 		allow_null=True
 	)
 
-	class Meta(DeviceSerializerMixin.Meta):
+	class Meta(DeviceSerializer.Meta):
 		model = GCMDevice
 		extra_kwargs = {"id": {"read_only": False, "required": False}}
 

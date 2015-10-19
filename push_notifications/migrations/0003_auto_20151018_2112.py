@@ -12,9 +12,18 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
+            model_name='apnsdevice',
+            name='registration_id',
+            field=models.CharField(max_length=64, verbose_name='Registration ID'),
+        ),
+        migrations.AlterField(
             model_name='gcmdevice',
             name='registration_id',
             field=models.TextField(verbose_name='Registration ID'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='apnsdevice',
+            unique_together=set([('user', 'registration_id')]),
         ),
         migrations.AlterUniqueTogether(
             name='gcmdevice',
