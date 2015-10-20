@@ -43,6 +43,19 @@ def _unsigned_integer_to_hex_string(value):
 	return hex(value).rstrip("L")
 
 
+# Luke: methods replaced by my work that went into upstream
+#def _using_postgres():
+#	return connection.settings_dict["ENGINE"] in postgres_engines
+#
+#
+#def _signed_to_unsigned(value):
+#	return struct.unpack("Q", struct.pack("q", value))[0]
+#
+#
+#def _unsigned_to_signed(value):
+#	return struct.unpack("q", struct.pack("Q", value))[0]
+#
+
 class HexadecimalField(forms.CharField):
 	"""
 	A form field that accepts only hexadecimal numbers
