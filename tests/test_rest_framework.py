@@ -108,7 +108,11 @@ class GCMDeviceSerializerTestCase(TestCase):
 		self.assertFalse(serializer.is_valid())
 		self.assertEqual(serializer.errors, GCM_DRF_OUT_OF_RANGE_ERROR)
 
+<<<<<<< 596fa9fa86d17ffe7d107cdbf01655d353b82bef
 	def test_device_id_validation_value_between_signed_unsigned_64b_int_maximums(self):
+=======
+        def test_device_id_validation_value_between_signed_unsigned_64b_int_maximums(self):
+>>>>>>> Correcting rest framework validation of GCMDevice.device_id max value.
 		"""
 		2**63 < 0xe87a4e72d634997c < 2**64
 		"""
@@ -118,3 +122,7 @@ class GCMDeviceSerializerTestCase(TestCase):
 			"device_id": "e87a4e72d634997c",
 		})
 		self.assertTrue(serializer.is_valid())
+<<<<<<< 596fa9fa86d17ffe7d107cdbf01655d353b82bef
+=======
+
+>>>>>>> Correcting rest framework validation of GCMDevice.device_id max value.

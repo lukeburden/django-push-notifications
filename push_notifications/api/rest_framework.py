@@ -9,7 +9,6 @@ from push_notifications.models import APNSDevice, GCMDevice, WNSDevice
 from push_notifications.fields import hex_re
 from push_notifications.fields import UNSIGNED_64BIT_INT_MAX_VALUE
 
-
 # Fields
 
 
