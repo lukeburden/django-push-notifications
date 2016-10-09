@@ -31,12 +31,22 @@ class HexIntegerField(IntegerField):
 
 
 # Serializers
-class DeviceSerializer(ModelSerializer):
+
+class DeviceSerializerMixin(ModelSerializer):
 
 	class Meta:
 		fields = ("id", "name", "registration_id", "device_id", "active", "date_created")
 		read_only_fields = ("date_created",)
+
+		# See https://github.com/tomchristie/django-rest-framework/issues/1101
+		extra_kwargs = {"active": {"default": True}}
+
 # Luke: preventing editing of registration_id
+#class DeviceSerializer(ModelSerializer):
+#
+#	class Meta:
+#		fields = ("id", "name", "registration_id", "device_id", "active", "date_created")
+#		read_only_fields = ("date_created",)
 #		fields = ("name", "registration_id", "device_id", "active", "date_created")
 #		read_only_fields = ("date_created",)
 #
@@ -60,12 +70,13 @@ class DeviceSerializer(ModelSerializer):
 #                    "A device with that registration_id already exists for that user."
 #                )
 #            return value
-
-		# See https://github.com/tomchristie/django-rest-framework/issues/1101
-		extra_kwargs = {"active": {"default": True}}
+#
+#		# See https://github.com/tomchristie/django-rest-framework/issues/1101
+#		extra_kwargs = {"active": {"default": True}}
 
 
 class APNSDeviceSerializer(ModelSerializer):
+
 	class Meta(DeviceSerializerMixin.Meta):
 		model = APNSDevice
 
@@ -117,7 +128,7 @@ class GCMDeviceSerializer(UniqueRegistrationSerializerMixin, ModelSerializer):
 		allow_null=True
 	)
 
-	class Meta(DeviceSerializer.Meta):
+	class Meta(DeviceSerializerMixin.Meta):
 		model = GCMDevice
 		extra_kwargs = {"id": {"read_only": False, "required": False}}
 
