@@ -8,6 +8,7 @@ from rest_framework.fields import IntegerField
 from push_notifications.models import APNSDevice, GCMDevice, WNSDevice
 from push_notifications.fields import hex_re
 from push_notifications.fields import UNSIGNED_64BIT_INT_MAX_VALUE
+from push_notifications.fields import _unsigned_integer_to_hex_string
 
 # Fields
 
@@ -27,7 +28,7 @@ class HexIntegerField(IntegerField):
 		return super(HexIntegerField, self).to_internal_value(data)
 
 	def to_representation(self, value):
-		return value
+		return _unsigned_integer_to_hex_string(value)
 
 
 # Serializers
@@ -41,49 +42,43 @@ class DeviceSerializerMixin(ModelSerializer):
 		# See https://github.com/tomchristie/django-rest-framework/issues/1101
 		extra_kwargs = {"active": {"default": True}}
 
-# Luke: preventing editing of registration_id
-#class DeviceSerializer(ModelSerializer):
-#
-#	class Meta:
-#		fields = ("id", "name", "registration_id", "device_id", "active", "date_created")
-#		read_only_fields = ("date_created",)
-#		fields = ("name", "registration_id", "device_id", "active", "date_created")
-#		read_only_fields = ("date_created",)
-#
-#        def __init__(self, *args, **kwargs):
-#            """ Don't allow editing of the registration_id after
-#            instance creation """
-#            super(DeviceSerializer, self).__init__(*args, **kwargs)
-#            if self.updating():
-#                self.fields['registration_id'].read_only = True
-#
-#        def updating(self):
-#            return hasattr(self, 'instance') and self.instance
-#
-#        def validate_registration_id(self, value):
-#            """ Todo: poke around DRF and see if this is vulnerable to a race condition """
-#            if not self.updating() and self.__class__.Meta.model.objects.filter(
-#                user = self.context['request'].user,
-#                registration_id = value
-#            ).exists():
-#                raise ValidationError(
-#                    "A device with that registration_id already exists for that user."
-#                )
-#            return value
-#
-#		# See https://github.com/tomchristie/django-rest-framework/issues/1101
-#		extra_kwargs = {"active": {"default": True}}
+	class Meta:
+		fields = ("id", "name", "registration_id", "device_id", "active", "date_created")
+		read_only_fields = ("date_created",)
+		fields = ("name", "registration_id", "device_id", "active", "date_created")
+		read_only_fields = ("date_created",)
+
+        def __init__(self, *args, **kwargs):
+            """ Don't allow editing of the registration_id after
+            instance creation """
+            super(DeviceSerializerMixin, self).__init__(*args, **kwargs)
+            if self.updating():
+                self.fields['registration_id'].read_only = True
+
+        def updating(self):
+            return hasattr(self, 'instance') and self.instance
+
+        def validate_registration_id(self, value):
+            """ Todo: poke around DRF and see if this is vulnerable to a race condition """
+            if not self.updating() and self.__class__.Meta.model.objects.filter(
+                user = self.context['request'].user,
+                registration_id = value
+            ).exists():
+                raise ValidationError(
+                    "A device with that registration_id already exists for that user."
+                )
+            return value
 
 
-class APNSDeviceSerializer(ModelSerializer):
+class APNSDeviceSerializer(DeviceSerializerMixin):
 
 	class Meta(DeviceSerializerMixin.Meta):
 		model = APNSDevice
 
 	def validate_registration_id(self, value):
+		value = super(APNSDeviceSerializer, self).validate_registration_id(value)
 		# iOS device tokens are 256-bit hexadecimal (64 characters). In 2016 Apple is increasing
 		# iOS device tokens to 100 bytes hexadecimal (200 characters).
-
 		if hex_re.match(value) is None or len(value) not in (64, 200):
 			raise ValidationError("Registration ID (device token) is invalid")
 		return value
@@ -120,7 +115,8 @@ class UniqueRegistrationSerializerMixin(Serializer):
 		return attrs
 
 
-class GCMDeviceSerializer(UniqueRegistrationSerializerMixin, ModelSerializer):
+class GCMDeviceSerializer(DeviceSerializerMixin):
+
 	device_id = HexIntegerField(
 		help_text="ANDROID_ID / TelephonyManager.getDeviceId() (e.g: 0x01)",
 		style={"input_type": "text"},
@@ -131,18 +127,6 @@ class GCMDeviceSerializer(UniqueRegistrationSerializerMixin, ModelSerializer):
 	class Meta(DeviceSerializerMixin.Meta):
 		model = GCMDevice
 		extra_kwargs = {"id": {"read_only": False, "required": False}}
-
-# added by Luke to enforce registration_id uniqueness, may not be needed now
-#        def validate_registration_id(self, value):
-#            """ Todo: poke around DRF and see if this is vulnerable to a race condition """
-#            if GCMDevice.objects.filter(
-#                user = self.context['request'].user,
-#                registration_id = value
-#            ).exists():
-#                raise ValidationError(
-#                    "A device with that registration_id already exists for that user."
-#                )
-#            return value
 
 	def validate_device_id(self, value):
 		# device ids are 64 bit unsigned values
