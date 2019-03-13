@@ -200,7 +200,9 @@ class APNSDevice(Device):
 			push_service = FCMNotification(api_key=SETTINGS["GCM_API_KEY"])
 			result = push_service.notify_single_device(
 				registration_id=self.fcm_token,
-				message_title=message,
+				# if we include message_title, the payload includes `alert` as a hash
+				# rather than a string. By excluding it, only a string is delivered.
+				# message_title=message,
 				message_body=message,
 				data_message=extra
 			)
