@@ -208,8 +208,10 @@ class APNSDevice(Device):
 			)
 			deactivate_device_on_fcm_error(self, result)
 		else:
-			from .apns import apns_send_message
-			return apns_send_message(registration_id=self.registration_id, alert=message, **kwargs)
+			# Realistically, it should not fail. We'll notify ourselves for awhile
+			# and if we don't see this crop up very often, we'll likely just silence
+			# this
+			raise Exception("Failed to send to an iOS device via Firebase")
 
 
 class WNSDeviceManager(models.Manager):
