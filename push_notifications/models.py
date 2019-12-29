@@ -1,11 +1,8 @@
-from __future__ import unicode_literals
-
 import json
 import requests
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from pyfcm import FCMNotification
@@ -17,14 +14,13 @@ from .settings import PUSH_NOTIFICATIONS_SETTINGS as SETTINGS
 conversion_url = "https://iid.googleapis.com/iid/v1:batchImport"
 
 
-@python_2_unicode_compatible
 class Device(models.Model):
 	name = models.CharField(max_length=255, verbose_name=_("Name"), blank=True, null=True)
 	active = models.BooleanField(
 		verbose_name=_("Is active"), default=True,
 		help_text=_("Inactive devices will not be sent notifications")
 	)
-	user = models.ForeignKey(SETTINGS["USER_MODEL"], blank=True, null=True)
+	user = models.ForeignKey(SETTINGS["USER_MODEL"], blank=True, null=True, on_delete=models.CASCADE)
 	date_created = models.DateTimeField(
 		verbose_name=_("Creation date"), auto_now_add=True, null=True
 	)
