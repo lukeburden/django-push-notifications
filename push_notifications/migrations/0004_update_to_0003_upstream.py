@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='Creation date', null=True)),
                 ('device_id', models.UUIDField(blank=True, help_text='GUID()', null=True, verbose_name='Device ID', db_index=True)),
                 ('registration_id', models.TextField(verbose_name='Notification URI')),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'WNS device',
