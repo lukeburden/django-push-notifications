@@ -48,26 +48,26 @@ class DeviceSerializerMixin(ModelSerializer):
 		fields = ("name", "registration_id", "device_id", "active", "date_created")
 		read_only_fields = ("date_created",)
 
-		def __init__(self, *args, **kwargs):
-			""" Don't allow editing of the registration_id after
-			instance creation """
-			super(DeviceSerializerMixin, self).__init__(*args, **kwargs)
-			if self.updating():
-				self.fields['registration_id'].read_only = True
+	def __init__(self, *args, **kwargs):
+		""" Don't allow editing of the registration_id after
+		instance creation """
+		super(DeviceSerializerMixin, self).__init__(*args, **kwargs)
+		if self.updating():
+			self.fields['registration_id'].read_only = True
 
-		def updating(self):
-			return hasattr(self, 'instance') and self.instance
+	def updating(self):
+		return hasattr(self, 'instance') and self.instance
 
-		def validate_registration_id(self, value):
-			""" Todo: poke around DRF and see if this is vulnerable to a race condition """
-			if not self.updating() and self.__class__.Meta.model.objects.filter(
-				user = self.context['request'].user,
-				registration_id = value
-			).exists():
-				raise ValidationError(
-					"A device with that registration_id already exists for that user."
-				)
-			return value
+	def validate_registration_id(self, value):
+		""" Todo: poke around DRF and see if this is vulnerable to a race condition """
+		if not self.updating() and self.__class__.Meta.model.objects.filter(
+			user = self.context['request'].user,
+			registration_id = value
+		).exists():
+			raise ValidationError(
+				"A device with that registration_id already exists for that user."
+			)
+		return value
 
 
 class APNSDeviceSerializer(DeviceSerializerMixin):
@@ -76,7 +76,7 @@ class APNSDeviceSerializer(DeviceSerializerMixin):
 		model = APNSDevice
 
 	def validate_registration_id(self, value):
-		value = super(DeviceSerializerMixin, self).validate_registration_id(value)
+		value = super(APNSDeviceSerializer, self).validate_registration_id(value)
 		# iOS device tokens are 256-bit hexadecimal (64 characters). In 2016 Apple is increasing
 		# iOS device tokens to 100 bytes hexadecimal (200 characters).
 		if hex_re.match(value) is None or len(value) not in (64, 200):
