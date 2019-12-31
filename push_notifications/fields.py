@@ -110,7 +110,7 @@ class HexIntegerField(models.BigIntegerField):
 			value = _unsigned_to_signed_integer(value)
 		return value
 
-	def from_db_value(self, value, expression, connection, context):
+	def from_db_value(self, value, expression, connection):
 		""" Return an unsigned int representation from all db backends """
 		if value is None:
 			return value
